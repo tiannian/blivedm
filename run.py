@@ -3,17 +3,21 @@
 import sys
 from asyncio import get_event_loop
 from ssl import SSLError
+import subprocess
 
 from blivedm import BLiveClient
-
 
 class MyBLiveClient(BLiveClient):
 
     async def _on_get_popularity(self, popularity):
-        print('当前人气值：', popularity)
+        print('当前人气值:', popularity)
+        command = ["notify-send","Danmuji", "当前人气: %d" % popularity]
+        subprocess.Popen(command)
 
     async def _on_get_danmaku(self, content, user_name):
         print(user_name, '说：', content)
+        command = ["notify-send","Danmuji: %s" % user_name, content]
+        subprocess.Popen(command)
 
     def _on_stop(self, exc):
         self._loop.stop()
@@ -29,7 +33,7 @@ def main():
     loop = get_event_loop()
 
     # 如果SSL验证失败就把第二个参数设为False
-    client = MyBLiveClient(139, True)
+    client = MyBLiveClient(int(sys.argv[1]), True)
     client.start()
 
     # 5秒后停止，测试用
